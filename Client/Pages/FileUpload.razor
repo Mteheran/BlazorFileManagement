@@ -1,0 +1,24 @@
+@page "/files"
+@using System.Text.RegularExpressions
+
+<InputFile OnChange="@OnInputFileChange"  class="btn btn-primary" />   
+
+
+
+<div class="form-group">
+    <p>@file?.Name</p>
+    <p>@file?.ContentType</p>
+    <p>@(file?.Size != null ? file?.Size/1024 + " KBs" : "")</p>
+    <p>@file?.LastModified</p>
+</div>
+
+@code
+{
+    IBrowserFile file;
+    public async Task OnInputFileChange(InputFileChangeEventArgs e)  
+    {  
+        file = e.File;  
+        
+    }  
+  
+}
