@@ -3,8 +3,6 @@
 
 <InputFile OnChange="@OnInputFileChange"  class="btn btn-primary" />   
 
-
-
 <div class="form-group">
     <p>@file?.Name</p>
     <p>@file?.ContentType</p>
@@ -18,7 +16,6 @@
     public async Task OnInputFileChange(InputFileChangeEventArgs e)  
     {  
         file = e.File;  
-        
     }  
   
 }
