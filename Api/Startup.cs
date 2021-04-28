@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using api.Services;
 
 namespace api
 {
@@ -26,6 +27,7 @@ namespace api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IAzureStorageService, AzureStorageService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -45,6 +47,9 @@ namespace api
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors(p=> 
+            p.WithOrigins("https://localhost:5001").AllowAnyHeader());
 
             app.UseRouting();
 

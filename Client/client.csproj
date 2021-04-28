@@ -9,5 +9,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.5" PrivateAssets="all" />
     <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference  Include="..\shared\shared.csproj"   />
+  </ItemGroup>
 
 </Project>
