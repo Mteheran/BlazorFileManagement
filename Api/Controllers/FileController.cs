@@ -22,6 +22,20 @@ namespace api.Controllers
             _azureFile = azure;
         }
 
+        [HttpGet]
+        public async Task<IEnumerable<BlazorFile>> Get()
+        {
+            _logger.LogDebug("Gettings files...");
+            return await _azureFile.GetFiles();
+        }
+
+        [HttpGet("{id}")]
+        public async Task<BlazorFile> Get(string id)
+        {
+            _logger.LogDebug("Gettings files...");
+            return  await _azureFile.GetInfoFile(id);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] BlazorFile file)
         {

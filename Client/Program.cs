@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using client.Services;
 
 namespace client
 {
@@ -18,6 +19,7 @@ namespace client
             builder.RootComponents.Add<App>("#app");
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:5010") });
+            builder.Services.AddScoped<IFileService, FileService>();
 
             await builder.Build().RunAsync();
         }
