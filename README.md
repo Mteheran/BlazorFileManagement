@@ -39,13 +39,15 @@ Using Regex we can validate the file extension
 IBrowserFile file;
 public async Task OnInputFileChange(InputFileChangeEventArgs e)  
 {  
-    file = e.File;
+   
     Regex regex = new Regex(".+\\.csv", RegexOptions.Compiled);  
-    if (regex.IsMatch(singleFile.Name))  
+    if (regex.IsMatch(e.File))  
     {  
+        file = e.File;
     }
 }
 ```
+
 
 
 Using Regex we can validate the file extension
@@ -53,26 +55,11 @@ Using Regex we can validate the file extension
 ```csharp
 IBrowserFile file;
 public async Task OnInputFileChange(InputFileChangeEventArgs e)  
-{  
-    file = e.File;
+{   
     Regex regex = new Regex(".+\\.csv", RegexOptions.Compiled);  
-    if (regex.IsMatch(singleFile.Name))  
+    if (regex.IsMatch(e.File))  
     {  
-    }
-}
-```
-
-
-Using Regex we can validate the file extension
-
-```csharp
-IBrowserFile file;
-public async Task OnInputFileChange(InputFileChangeEventArgs e)  
-{  
-    file = e.File;
-    Regex regex = new Regex(".+\\.csv", RegexOptions.Compiled);  
-    if (regex.IsMatch(singleFile.Name))  
-    {  
+         file = e.File;
         var stream = singleFile.OpenReadStream();  
         var csv = new List<string[]>();  
         MemoryStream ms = new MemoryStream();  
