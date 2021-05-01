@@ -91,3 +91,127 @@ private string[] SplitCSV(string input)
     return list.ToArray();  
 }  
 ```
+### Azure storage
+
+AzureStorageService is used to save and get information for a specifict container in Azure blob storage
+
+```csharp
+public class AzureStorageService : IAzureStorageService
+    {       
+        private readonly IConfiguration Configuration;
+        private readonly  string containerName = "csvcontainer";
+        private string connectionString = "";
+        public AzureStorageService(IConfiguration configuration)
+        {
+            Configuration = configuration;
+            connectionString =  Configuration["AZURE_STORAGE_CONNECTION_STRING"];
+        }
+        public async Task SaveFileAsync(BlazorFile file)
+        {
+            // Create a BlobServiceClient object which will be used to create a container client
+            BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);    
+
+            // Create the container and return a container client object
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName); 
+
+            await containerClient.UploadBlobAsync(file.FileName, new MemoryStream(file.FileInfo));
+        }
+
+        public async Task<IEnumerable<BlazorFile>> GetFiles()
+        {
+            // Create a BlobServiceClient object which will be used to create a container client
+            BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
+
+            // Create the container and return a container client object
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName); 
+
+            var blobs = containerClient.GetBlobs(Azure.Storage.Blobs.Models.BlobTraits.All, Azure.Storage.Blobs.Models.BlobStates.Version);
+            List<BlazorFile> list = new List<BlazorFile>();
+
+            foreach(var item in blobs)
+            {
+                var newBlazorFile = new BlazorFile() { FileName = item.Name  };
+                list.Add(newBlazorFile);
+            }
+
+            return list;
+        }
+    
+        public async Task<BlazorFile> GetInfoFile(string fileName)
+        {
+            // Create a BlobServiceClient object which will be used to create a container client
+            BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
+
+            // Create the container and return a container client object
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName); 
+
+            var blobFile = containerClient.GetBlobClient(fileName);
+            var fileInfoInMemory = await blobFile.DownloadAsync();
+
+            MemoryStream ms = new MemoryStream();  
+
+            await fileInfoInMemory.Value.Content.CopyToAsync(ms);
+            
+            var newBlazorFile = new BlazorFile() { FileName = blobFile.Name, FileInfo = ms.ToArray()  };
+
+            return newBlazorFile;
+        }
+    
+    }
+
+    public interface IAzureStorageService
+    {
+        Task SaveFileAsync(BlazorFile file);
+        Task<IEnumerable<BlazorFile>> GetFiles();
+        Task<BlazorFile> GetInfoFile(string fileName);
+    }
+```
+
+You can set up this dependency on en Startup.cs file
+
+```csharp
+ services.AddScoped<IAzureStorageService, AzureStorageService>();
+```
+
+Expose the method using the FileController.cs
+
+```csharp
+    [ApiController]
+    [Route("[controller]")]
+    public class FileController : ControllerBase
+    {
+        private readonly ILogger<FileController> _logger;
+        private readonly IAzureStorageService _azureFile;
+
+        public FileController(ILogger<FileController> logger, IAzureStorageService azure)
+        {
+            _logger = logger;
+            _azureFile = azure;
+        }
+
+        [HttpGet]
+        public async Task<IEnumerable<BlazorFile>> Get()
+        {
+            _logger.LogDebug("Gettings files...");
+            return await _azureFile.GetFiles();
+        }
+
+        [HttpGet("{id}")]
+        public async Task<BlazorFile> Get(string id)
+        {
+            _logger.LogDebug("Gettings files...");
+            return  await _azureFile.GetInfoFile(id);
+        }
+
+        [HttpPost]
+        public IActionResult Post([FromBody] BlazorFile file)
+        {
+            _logger.LogDebug("Saving file...");
+            _azureFile.SaveFileAsync(file);
+
+            _logger.LogDebug("File saved!");
+
+            return Ok();
+        }
+    }
+```
